@@ -344,8 +344,36 @@
 
  #endif
 
-
+// for CC3200
+#elif defined(ENERGIA)
+    #define write8inline(d) { \
+        asm("mov r0,r0"); \
+        }
+        
+    #define read8inline(result) { \
+        asm("mov r0,r0"); \
+        }
+        
+    #define setWriteDirInline() { \
+        asm("mov r0,r0"); \
+        }
+        
+    #define setReadDirInline() { \
+        asm("mov r0,r0"); \
+        }
+        
+        
+    #define RD_ACTIVE   asm("mov r0,r0")
+    #define RD_IDLE     asm("mov r0,r0")
+    #define WR_ACTIVE   asm("mov r0,r0")
+    #define WR_IDLE     asm("mov r0,r0")
+    #define CD_COMMAND  asm("mov r0,r0")
+    #define CD_DATA     asm("mov r0,r0")
+    #define CS_ACTIVE   asm("mov r0,r0")
+    #define CS_IDLE     asm("mov r0,r0")
+    
 #else
+
 
  #error "Board type unsupported / not recognized"
 

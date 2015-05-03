@@ -93,6 +93,12 @@ class Adafruit_TFTLCD : public Adafruit_GFX {
 					  csPinUnset,  cdPinUnset,  wrPinUnset,  rdPinUnset,
 					  _reset;
   #endif
+  #if defined(ENERGIA)
+    uint32_t *csPort    , *cdPort    , *wrPort    , *rdPort;
+	uint32_t          csPinSet  ,  cdPinSet  ,  wrPinSet  ,  rdPinSet  ,
+					  csPinUnset,  cdPinUnset,  wrPinUnset,  rdPinUnset,
+					  _reset;
+  #endif
   
 #endif
 };

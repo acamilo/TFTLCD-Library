@@ -13,7 +13,9 @@
 #ifdef __AVR__
 	#include <avr/pgmspace.h>
 #endif
-#include "pins_arduino.h"
+#ifndef ENERGIA
+    #include "pins_arduino.h"
+#endif
 #include "wiring_private.h"
 #include "Adafruit_TFTLCD.h"
 #include "pin_magic.h"
