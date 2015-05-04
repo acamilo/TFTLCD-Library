@@ -86,18 +86,23 @@ class Adafruit_TFTLCD : public Adafruit_GFX {
 	uint8_t           csPinSet  ,  cdPinSet  ,  wrPinSet  ,  rdPinSet  ,
 					  csPinUnset,  cdPinUnset,  wrPinUnset,  rdPinUnset,
 					  _reset;
+					  
+    uint8_t _cs,_cd,_wr,_rd;
   #endif
   #if defined(__SAM3X8E__)
     Pio *csPort    , *cdPort    , *wrPort    , *rdPort;
 	uint32_t          csPinSet  ,  cdPinSet  ,  wrPinSet  ,  rdPinSet  ,
 					  csPinUnset,  cdPinUnset,  wrPinUnset,  rdPinUnset,
 					  _reset;
+					  
+	uint32_t _cs,_cd,_wr,_rd;
   #endif
   #if defined(ENERGIA)
     uint32_t *csPort    , *cdPort    , *wrPort    , *rdPort;
 	uint32_t          csPinSet  ,  cdPinSet  ,  wrPinSet  ,  rdPinSet  ,
 					  csPinUnset,  cdPinUnset,  wrPinUnset,  rdPinUnset,
 					  _reset;
+	uint32_t _cs,_cd,_wr,_rd;
   #endif
   
 #endif

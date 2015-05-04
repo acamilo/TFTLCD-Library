@@ -61,6 +61,13 @@
     "rjmp .+0" "\n\t" \
     "nop"      "\n"   \
     ::);
+#ifdef ENERGIA
+    #include "inc/hw_types.h"
+#include "inc/hw_gpio.h"
+#include "inc/hw_ints.h"
+#include "inc/hw_memmap.h"
+#include "inc/hw_common_reg.h"
+#endif
 
 #if defined(__AVR_ATmega168__) || defined(__AVR_ATmega328P__) || defined (__AVR_ATmega328__) || defined(__AVR_ATmega8__)
 
@@ -342,35 +349,55 @@
     #define CS_ACTIVE	csPort->PIO_CODR |= csPinSet		//PIO_Clear(csPort, csPinSet)
     #define CS_IDLE		csPort->PIO_SODR |= csPinSet		//PIO_Set(csPort, csPinSet)
 
- #endif
+#endif
 
 // for CC3200
+// hardcoded to GPIO 4,5,6,7 8,9,a,b
 #elif defined(ENERGIA)
+        // HWREG(GPIOA0_BASE + (GPIO_O_GPIO_DATA + (0xf0 << 2))) = d<<4; 
+        // HWREG(GPIOA1_BASE + (GPIO_O_GPIO_DATA + (0x0f << 2))) = d>>4;
     #define write8inline(d) { \
-        asm("mov r0,r0"); \
+        HWREG(GPIOA0_BASE + (GPIO_O_GPIO_DATA + (0xf0 << 2))) = d<<4; \
+        HWREG(GPIOA1_BASE + (GPIO_O_GPIO_DATA + (0x0f << 2))) = d>>4; \
+        WR_ACTIVE; \
+        delayMicroseconds(30);      \
+        WR_IDLE; \
+        delayMicroseconds(30);      \
         }
         
     #define read8inline(result) { \
-        asm("mov r0,r0"); \
+        RD_ACTIVE;   \
+		delayMicroseconds(30);      \
+        result = ((HWREG(GPIOA0_BASE + (GPIO_O_GPIO_DATA + (0xF0 << 2)))>>4)  + (  HWREG(GPIOA1_BASE + (GPIO_O_GPIO_DATA + (0x0F << 2)))<<4  )   ); \
+        delayMicroseconds(30); \
+        RD_IDLE;   \
+        delayMicroseconds(30); \
         }
         
+        
     #define setWriteDirInline() { \
-        asm("mov r0,r0"); \
+            delayMicroseconds(30);      \
+        HWREG(GPIOA0_BASE + GPIO_O_GPIO_DIR) = (HWREG(GPIOA0_BASE + GPIO_O_GPIO_DIR) | 0x000000f0); \
+        HWREG(GPIOA1_BASE + GPIO_O_GPIO_DIR) = (HWREG(GPIOA1_BASE + GPIO_O_GPIO_DIR) | 0x0000000f); \
+        delayMicroseconds(30);      \
         }
         
     #define setReadDirInline() { \
-        asm("mov r0,r0"); \
+            delayMicroseconds(30);      \
+        HWREG(GPIOA0_BASE + GPIO_O_GPIO_DIR) = (HWREG(GPIOA0_BASE + GPIO_O_GPIO_DIR) & (~0x000000f0)); \
+        HWREG(GPIOA1_BASE + GPIO_O_GPIO_DIR) = (HWREG(GPIOA1_BASE + GPIO_O_GPIO_DIR) & (~0x0000000f)); \
+        delayMicroseconds(30);      \
         }
         
-        
-    #define RD_ACTIVE   asm("mov r0,r0")
-    #define RD_IDLE     asm("mov r0,r0")
-    #define WR_ACTIVE   asm("mov r0,r0")
-    #define WR_IDLE     asm("mov r0,r0")
-    #define CD_COMMAND  asm("mov r0,r0")
-    #define CD_DATA     asm("mov r0,r0")
-    #define CS_ACTIVE   asm("mov r0,r0")
-    #define CS_IDLE     asm("mov r0,r0")
+    // turbo slow but enough to get it working.    
+    #define RD_ACTIVE   digitalWrite(_rd,LOW)
+    #define RD_IDLE     digitalWrite(_rd,HIGH)
+    #define WR_ACTIVE   digitalWrite(_wr,LOW)
+    #define WR_IDLE     digitalWrite(_wr,HIGH)
+    #define CD_COMMAND  digitalWrite(_cd,LOW)
+    #define CD_DATA     digitalWrite(_cd,HIGH)
+    #define CS_ACTIVE   digitalWrite(_cs,LOW)
+    #define CS_IDLE     digitalWrite(_cs,HIGH)
     
 #else
 

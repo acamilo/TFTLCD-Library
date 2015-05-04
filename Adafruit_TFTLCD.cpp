@@ -3,7 +3,7 @@
 
 // Graphics library by ladyada/adafruit with init code from Rossum
 // MIT license
-
+//#define DEBUG
 #if defined(__SAM3X8E__)
 	#include <include/pio.h>
     #define PROGMEM
@@ -19,12 +19,23 @@
 #include "wiring_private.h"
 #include "Adafruit_TFTLCD.h"
 #include "pin_magic.h"
+//#define DEBUG
 
 //#define TFTWIDTH   320
 //#define TFTHEIGHT  480
 
 #define TFTWIDTH   240
 #define TFTHEIGHT  320
+
+    // something is wrong. pin_magic defines seem to not point to what they should
+    #define RD_ACTIVE   digitalWrite(_rd,LOW)
+    #define RD_IDLE     digitalWrite(_rd,HIGH)
+    #define WR_ACTIVE   digitalWrite(_wr,LOW)
+    #define WR_IDLE     digitalWrite(_wr,HIGH)
+    #define CD_COMMAND  digitalWrite(_cd,LOW)
+    #define CD_DATA     digitalWrite(_cd,HIGH)
+    #define CS_ACTIVE   digitalWrite(_cs,LOW)
+    #define CS_IDLE     digitalWrite(_cs,HIGH)
 
 // LCD controller chip identifiers
 #define ID_932X    0
@@ -44,6 +55,10 @@ Adafruit_TFTLCD::Adafruit_TFTLCD(
 #ifndef USE_ADAFRUIT_SHIELD_PINOUT
   // Convert pin numbers to registers and bitmasks
   _reset     = reset;
+  _cs = cs;
+  _rd = rd;
+  _wr = wr;
+  _cd = cd;
   #ifdef __AVR__
     csPort     = portOutputRegister(digitalPinToPort(cs));
     cdPort     = portOutputRegister(digitalPinToPort(cd));
@@ -76,15 +91,17 @@ Adafruit_TFTLCD::Adafruit_TFTLCD(
     wrPort->PIO_SODR  |=  wrPinSet;
     rdPort->PIO_SODR  |=  rdPinSet;
   #endif
-  pinMode(cs, OUTPUT);    // Enable outputs
-  pinMode(cd, OUTPUT);
-  pinMode(wr, OUTPUT);
-  pinMode(rd, OUTPUT);
+  pinMode(_cs, OUTPUT);    // Enable outputs
+  pinMode(_cd, OUTPUT);
+  pinMode(_wr, OUTPUT);
+  pinMode(_rd, OUTPUT);
+
   if(reset) {
     digitalWrite(reset, HIGH);
     pinMode(reset, OUTPUT);
   }
 #endif
+
 
   init();
 }
@@ -96,6 +113,26 @@ Adafruit_TFTLCD::Adafruit_TFTLCD(void) : Adafruit_GFX(TFTWIDTH, TFTHEIGHT) {
 
 // Initialization common to both shield & breakout configs
 void Adafruit_TFTLCD::init(void) {
+
+#ifdef ENERGIA
+    pinMode(_rd, OUTPUT);
+    pinMode(_wr, OUTPUT);
+    pinMode(_cs, OUTPUT);
+    pinMode(_cd, OUTPUT);
+    pinMode(_reset, OUTPUT);
+    
+    // set bus to input. make sure cc3200 is in fact treating em as GPIO
+    // this is ugly
+    pinMode(26, INPUT);
+    pinMode(24, INPUT);
+    pinMode(5, INPUT);
+    pinMode(8, INPUT);
+    
+    pinMode(27, INPUT);
+    pinMode(29, INPUT);
+    pinMode(9, INPUT);
+    pinMode(10, INPUT);
+#endif
 
 #ifdef USE_ADAFRUIT_SHIELD_PINOUT
   CS_IDLE; // Set all control bits to idle state
@@ -308,8 +345,10 @@ void Adafruit_TFTLCD::begin(uint16_t id) {
       if(r == TFTLCD_DELAY) {
 	delay(len);
       } else {
-	//Serial.print("Register $"); Serial.print(r, HEX);
-	//Serial.print(" datalen "); Serial.println(len);
+#ifdef DEBUG
+	Serial.print("Register $"); Serial.print(r, HEX);
+	Serial.print(" datalen "); Serial.println(len);
+#endif
 
 	CS_ACTIVE;
 	CD_COMMAND;
@@ -877,25 +916,28 @@ uint16_t Adafruit_TFTLCD::readID(void) {
 
   uint8_t hi, lo;
 
-  /*
+#ifdef DEBUG
   for (uint8_t i=0; i<128; i++) {
     Serial.print("$"); Serial.print(i, HEX);
     Serial.print(" = 0x"); Serial.println(readReg(i), HEX);
   }
-  */
+#endif
 
   if (readReg(0x04) == 0x8000) { // eh close enough
     // setc!
-    /*
+#ifdef DEBUG
       Serial.println("!");
       for (uint8_t i=0; i<254; i++) {
       Serial.print("$"); Serial.print(i, HEX);
       Serial.print(" = 0x"); Serial.println(readReg(i), HEX);
       }
-    */
+#endif
     writeRegister24(HX8357D_SETC, 0xFF8357);
     delay(300);
-    //Serial.println(readReg(0xD0), HEX);
+    
+#ifdef DEBUG
+    Serial.println(readReg(0xD0), HEX);
+#endif
     if (readReg(0xD0) == 0x990000) {
       return 0x8357;
     }
@@ -946,8 +988,10 @@ uint32_t Adafruit_TFTLCD::readReg(uint8_t r) {
   CS_IDLE;
   setWriteDir();  // Restore LCD data port(s) to WRITE configuration
 
-  //Serial.print("Read $"); Serial.print(r, HEX); 
-  //Serial.print(":\t0x"); Serial.println(id, HEX);
+#ifdef DEBUG
+  Serial.print("Read $"); Serial.print(r, HEX); 
+  Serial.print(":\t0x"); Serial.println(id, HEX);
+  #endif
   return id;
 }
 
