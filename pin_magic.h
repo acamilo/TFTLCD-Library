@@ -356,40 +356,44 @@
 #elif defined(ENERGIA)
         // HWREG(GPIOA0_BASE + (GPIO_O_GPIO_DATA + (0xf0 << 2))) = d<<4; 
         // HWREG(GPIOA1_BASE + (GPIO_O_GPIO_DATA + (0x0f << 2))) = d>>4;
+
+        //1: 10->5 failed 2:10->5 failed
     #define write8inline(d) { \
         HWREG(GPIOA0_BASE + (GPIO_O_GPIO_DATA + (0xf0 << 2))) = d<<4; \
         HWREG(GPIOA1_BASE + (GPIO_O_GPIO_DATA + (0x0f << 2))) = d>>4; \
         WR_ACTIVE; \
-        delayMicroseconds(30);      \
+        delayMicroseconds(10);      \
         WR_IDLE; \
-        delayMicroseconds(30);      \
+        delayMicroseconds(10);      \
         }
-        
+            // 2: 20->10 failed 3:20->10 failed;    
     #define read8inline(result) { \
         RD_ACTIVE;   \
-		delayMicroseconds(30);      \
+		delayMicroseconds(10);      \
         result = ((HWREG(GPIOA0_BASE + (GPIO_O_GPIO_DATA + (0xF0 << 2)))>>4)  + (  HWREG(GPIOA1_BASE + (GPIO_O_GPIO_DATA + (0x0F << 2)))<<4  )   ); \
-        delayMicroseconds(30); \
+        delayMicroseconds(20);  \
         RD_IDLE;   \
-        delayMicroseconds(30); \
+        delayMicroseconds(20); \
         }
         
-        
+            // 2: 20->10 failed
     #define setWriteDirInline() { \
-            delayMicroseconds(30);      \
+            delayMicroseconds(10);      \
         HWREG(GPIOA0_BASE + GPIO_O_GPIO_DIR) = (HWREG(GPIOA0_BASE + GPIO_O_GPIO_DIR) | 0x000000f0); \
         HWREG(GPIOA1_BASE + GPIO_O_GPIO_DIR) = (HWREG(GPIOA1_BASE + GPIO_O_GPIO_DIR) | 0x0000000f); \
-        delayMicroseconds(30);      \
+        delayMicroseconds(20);      \
         }
         
+        // 1: 20->10 failed 2: 20->10 failed
     #define setReadDirInline() { \
-            delayMicroseconds(30);      \
+            delayMicroseconds(20);      \
         HWREG(GPIOA0_BASE + GPIO_O_GPIO_DIR) = (HWREG(GPIOA0_BASE + GPIO_O_GPIO_DIR) & (~0x000000f0)); \
         HWREG(GPIOA1_BASE + GPIO_O_GPIO_DIR) = (HWREG(GPIOA1_BASE + GPIO_O_GPIO_DIR) & (~0x0000000f)); \
-        delayMicroseconds(30);      \
+        delayMicroseconds(20);      \
         }
         
-    // turbo slow but enough to get it working.    
+    // turbo slow but enough to get it working.   
+    // this seems to not propigate through to tftlcd.cpp 
     #define RD_ACTIVE   digitalWrite(_rd,LOW)
     #define RD_IDLE     digitalWrite(_rd,HIGH)
     #define WR_ACTIVE   digitalWrite(_wr,LOW)
