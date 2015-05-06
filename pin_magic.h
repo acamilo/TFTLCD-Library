@@ -357,7 +357,7 @@
         // HWREG(GPIOA0_BASE + (GPIO_O_GPIO_DATA + (0xf0 << 2))) = d<<4; 
         // HWREG(GPIOA1_BASE + (GPIO_O_GPIO_DATA + (0x0f << 2))) = d>>4;
 
-        //1: 10->5 failed 2:10->5 failed
+        //1: 10->5 failed 2:10->5 
     #define write8inline(d) { \
         HWREG(GPIOA0_BASE + (GPIO_O_GPIO_DATA + (0xf0 << 2))) = d<<4; \
         HWREG(GPIOA1_BASE + (GPIO_O_GPIO_DATA + (0x0f << 2))) = d>>4; \
